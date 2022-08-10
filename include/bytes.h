@@ -3,6 +3,9 @@
 
 typedef unsigned int size_t;
 
+// TODO: Cast index to correct type to avoid narrowing warnings
+
+
 #define GETMASK(index, size) ((((size_t)1 << (size)) - 1) << (index))
 #define READFROM(data, index, size) \
     (((data)&GETMASK((index), (size))) >> (index))
@@ -30,3 +33,25 @@ typedef unsigned int size_t;
     ((value) == 0x01 ? BitSet(bit, bitPosition) : BitClear(bit, bitPosition))
 
 #define Bit(bitPosition) (1 << (bitPosition))
+
+#include <assert.h>
+
+static inline uint32_t swapBits(uint32_t bits, const uint8_t a, const uint8_t b, const uint8_t size, const uint8_t offset = 0)
+{
+    uint8_t temp = READFROM(bits, a * size + offset, size);
+    assert(temp > 0);
+    WRITETO(bits, a * size + offset, size,
+            READFROM(bits, b * size + offset, size));
+    WRITETO(bits, b * size + offset, size, temp);
+    return bits;
+}
+
+static inline uint32_t shuffleBits(uint32_t bits, const uint8_t len ,const uint8_t size, const uint8_t offset = 0)
+{
+    for (uint8_t i{static_cast<uint8_t>(len - 1)}; i > 0; i -= 1)
+    {
+        uint8_t j = rand() % (i + 1);
+        swapBits(bits,i, j, size, offset);
+    }
+    return bits;
+}

@@ -2,15 +2,16 @@
 #include "DiceResult.h"
 
 #include "dice_constants.h"
+#include "deck_defines.h"
 
 #include <stdint.h>
 
 class DiceController
 {
 public:
-    DiceController() : cardsInDeck{36}, bits{0b0}, rollCount{0} { shuffle(); }
+    DiceController() : cardsInDeck{36}, rollCount{0} { shuffle(); }
 
-    float getDiceProbability(uint8_t count);
+    float getDiceProbability(Dice *dice);
     const inline float getTotalProbabilityWeight();
 
     DiceResult rollDie();
@@ -25,9 +26,9 @@ public:
     Dice deck[11] = INITIAL_DECK;
 
     uint8_t cardsInDeck : 6; // 0..63
-    uint8_t bits : 5;        // 0..31
+
+    uint8_t draws[36] = INITIAL_DRAWS;
 
     // 24 bytes
-    FIELD(bits, rolls, 0, 3 * MAX_ROLLS_COUNT);
     uint8_t rollCount : 4; // 0..15
 };

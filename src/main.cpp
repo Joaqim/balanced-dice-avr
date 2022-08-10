@@ -10,7 +10,7 @@ void setup()
 {
   srand(1234);
 
-  int counts[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+  int counts[11] = {0};
   DiceController ctr{};
   for (int n{0}; n < 16; n += 1)
   {

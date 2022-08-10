@@ -2,5 +2,5 @@
 #include <Arduino.h>
 
 float randfloat();
-int randint(int max, int min = 0);
-int irand(int n);
+uint32_t randint(uint32_t max, uint32_t min = 0);
+uint32_t irand(uint32_t n);

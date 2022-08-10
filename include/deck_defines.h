@@ -1,8 +1,10 @@
 #pragma once
+#include <stdint.h>
 
 #define DECK_SIZE 11
 #define DECK_SIZE_PAIRS 36
-#define MINIMUM_PAIRS_BEFORE_RESHUFFLING 13
+#define MAX_ROLLS_COUNT 8
+#define MIN_ROLLS_BEFORE_RESHUFFLING 13
 #define PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED 0.3
 
 #define WITH_UNDO
@@ -17,6 +19,15 @@
     {                                                              \
         {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, { 12 } \
     }
+
+#define INITIAL_DRAWS { \
+        2, 3, 4, 5, 6, 7, 8, 9, 10, 11,  12 , \
+        3, 4, 5, 6, 7, 8, 9, 10, 11, \
+        4, 5, 6, 7, 8, 9, 10, \
+        5, 6, 7, 8, 9, \
+        6, 7, 8, \
+        7 \
+        }
 
 static const uint8_t DICE_PAIRS_CONST[DECK_SIZE][6][2] =
     {
