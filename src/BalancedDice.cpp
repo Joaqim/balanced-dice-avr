@@ -1,14 +1,15 @@
-#include "DiceController.h"
+#include "../include/BalancedDice.h"
 
 #include "dice_tables.h"
 #include "shuffle_macro.h"
+#include "random_utils.h"
 
 #include <assert.h>
 
 decl_shuffle(Dice);
 decl_shuffle(uint8_t);
 
-float DiceController::getDiceProbability(Dice *dice)
+float BalancedDice::getDiceProbability(Dice *dice)
 {
     assert(dice->count() > 0);
     const float probabilityModifier = 1 - (dice->roll_count() * PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED);
@@ -18,7 +19,7 @@ float DiceController::getDiceProbability(Dice *dice)
     return probability;
 }
 
-const float DiceController::getTotalProbabilityWeight()
+const float BalancedDice::getTotalProbabilityWeight()
 {
     float result{0};
     for (int i{0}; i < DECK_SIZE; i += 1)
@@ -32,16 +33,16 @@ const float DiceController::getTotalProbabilityWeight()
     return result;
 }
 
-DiceResult DiceController::rollDie()
+DiceResult BalancedDice::rollDie(uint16_t seed)
 {
     if (rollCount > MIN_ROLLS_BEFORE_RESHUFFLING)
     {
-        shuffle();
+        shuffle(seed);
     }
 
     const float totalProbability = getTotalProbabilityWeight();
 
-    float targetRandomNumber = randfloat() * totalProbability;
+    float targetRandomNumber = randfloat(seed) * totalProbability;
 
     Dice *dice;
     for (uint8_t i{rollCount}; i < DECK_SIZE_PAIRS; i += 1)
@@ -64,29 +65,14 @@ DiceResult DiceController::rollDie()
     return DiceResult{0, 0};
 }
 
-#if 1
-void DiceController::swap(uint8_t a, uint8_t b)
-{
-    Dice temp = deck[a];
-    deck[a] = deck[b];
-    deck[b] = temp;
-}
-
-void DiceController::shuffleDeck()
-{
-    // shuffle_Dice(deck, 12);
-    shuffle_uint8_t(draws, DECK_SIZE_PAIRS);
-}
-#endif
-
-void DiceController::shuffle()
+void BalancedDice::shuffle(uint16_t seed)
 {
     rollCount = 0;
     cardsInDeck = DECK_SIZE_PAIRS;
-    shuffleDeck();
+    shuffle_uint8_t(draws, DECK_SIZE_PAIRS, READFROM(seed, 0, 8));
     for (uint8_t i{0}; i < 11; i++)
     {
         deck[i].reset();
-        deck[i].shuffle();
+        deck[i].shuffle(READFROM(seed, 8, 16));
     }
 }

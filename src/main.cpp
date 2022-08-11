@@ -1,24 +1,24 @@
-#include "DiceController.h"
+#include "../include/BalancedDice.h"
 
 #include <Arduino.h>
 #include <stdint.h>
-#include <unistd.h>
 #include <assert.h>
 
 
 void setup()
 {
-  srand(1234);
-
+  const uint16_t seed = 12345;
   int counts[11] = {0};
-  DiceController ctr{};
+  BalancedDice ctr{seed};
   for (int n{0}; n < 16; n += 1)
   {
-    auto result = ctr.rollDie();
+    const uint16_t newSeed = 1974;
+    auto result = ctr.rollDie(newSeed);
     assert(result.value > 0);
     counts[result.value - 2] += 1;
   }
 
+  #if 0
   int t[12] = {};
   for (int n{0}; n < 11; n++)
   {
@@ -29,7 +29,7 @@ void setup()
     }
   }
 
-  assert(false);
+  #endif
 }
 
 void loop()

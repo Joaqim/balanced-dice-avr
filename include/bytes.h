@@ -46,11 +46,11 @@ static inline uint32_t swapBits(uint32_t bits, const uint8_t a, const uint8_t b,
     return bits;
 }
 
-static inline uint32_t shuffleBits(uint32_t bits, const uint8_t len ,const uint8_t size, const uint8_t offset = 0)
+static inline uint32_t shuffleBits(uint8_t seed,uint32_t bits, const uint8_t len ,const uint8_t size, const uint8_t offset = 0)
 {
     for (uint8_t i{static_cast<uint8_t>(len - 1)}; i > 0; i -= 1)
     {
-        uint8_t j = rand() % (i + 1);
+        uint8_t j = seed % (i + 1);
         swapBits(bits,i, j, size, offset);
     }
     return bits;

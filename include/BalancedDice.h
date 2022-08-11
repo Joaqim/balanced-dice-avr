@@ -6,22 +6,17 @@
 
 #include <stdint.h>
 
-class DiceController
+class BalancedDice
 {
 public:
-    DiceController() : cardsInDeck{36}, rollCount{0} { shuffle(); }
+    BalancedDice(uint16_t seed) : cardsInDeck{36}, rollCount{0} { shuffle(seed); }
 
     float getDiceProbability(Dice *dice);
     const inline float getTotalProbabilityWeight();
 
-    DiceResult rollDie();
+    DiceResult rollDie(uint16_t seed);
 
-#if 1
-    inline void swap(uint8_t a, uint8_t b);
-    inline void shuffleDeck();
-#endif
-
-    inline void shuffle();
+    void shuffle(uint16_t seed);
 
     Dice deck[11] = INITIAL_DECK;
 

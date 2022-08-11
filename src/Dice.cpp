@@ -14,10 +14,10 @@ void Dice::swap(uint8_t a, uint8_t b, uint8_t size, uint8_t offset)
     WRITETO(bits, b * size + offset, size, temp);
 }
 
-void Dice::shuffle()
+void Dice::shuffle(uint8_t seed)
 {
     #if 1
-    bits = shuffleBits(bits, count(),  6, 1);
+    bits = shuffleBits(seed, bits, count(),  6, 1);
     #else
     assert(count() > 0);
     for (uint8_t i{count() - (uint8_t)1}; i > 0; i -= 1)

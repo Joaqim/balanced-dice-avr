@@ -12,7 +12,7 @@ struct Dice
     uint32_t bits : 23;
 
     void swap(uint8_t a, uint8_t b, uint8_t size, uint8_t offset = 0);
-    void shuffle();
+    void shuffle(uint8_t seed);
 
     const bool hasPair(const uint8_t i);
     DiceResult popDice();
