@@ -1,5 +1,39 @@
+#include <avr/sleep.h>
+#include <EEPROM.h>
+#include <TinyI2CMaster.h>
+
+#include "eeprom_content.h"
 
 #include <avr/io.h>
+
+#ifndef cbi // Clear bit
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#endif
+#ifndef sbi // Set bit
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+#endif
+#ifndef bit_is_set
+#define bit_is_set(sfr, bit)   (_SFR_BYTE(sfr) & _BV(bit))
+#endif
+
+static bool eepromOk = false;
+
+static uint8_t currentAddress = RNG_READINGS_ADDRESS;
+
+// Variables for the Sleep/power down modes:
+volatile boolean f_wdt = 0;
+static int wdt_counter = 0;
+
+// Watchdog Interrupt Service / is executed when watchdog timed out
+ISR(WDT_vect) {
+  f_wdt=1;  // set global flag
+}
+
+ISR(PCINT0_vect) {}
+
+ISR(ADC_vect) {
+// ADC conversion complete
+}
 
 //Unimplemented User Input Trigger
 bool userInput(){
