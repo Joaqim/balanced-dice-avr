@@ -1,19 +1,20 @@
 #include "../include/BalancedDice.h"
 
 #include "dice_tables.h"
-#include "shuffle_macro.h"
 #include "random_utils.h"
 
 #include <assert.h>
 
-decl_shuffle(Dice);
-decl_shuffle(uint8_t);
-
 float BalancedDice::getDiceProbability(Dice *dice)
 {
-    assert(dice->count() > 0);
-    const float probabilityModifier = 1 - (dice->roll_count() * PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED);
+    assert(static_cast<uint8_t>(dice->count() > 0U));
+    const float probabilityModifier = 1 - (static_cast<uint8_t>(dice->roll_count()) * PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED);
+#if 1
+    assert(rollCount <= MIN_ROLLS_BEFORE_RESHUFFLING);
     const float probability = dice_probability_lookup_table[rollCount][dice->count() - 1] * probabilityModifier;
+#else
+    const float probability = (dice->count() / cardsInDeck) * probabilityModifier;
+#endif
     if (probability < 1)
         return 0;
     return probability;
@@ -21,13 +22,13 @@ float BalancedDice::getDiceProbability(Dice *dice)
 
 const float BalancedDice::getTotalProbabilityWeight()
 {
-    float result{0};
+    float result{0.f};
     for (int i{0}; i < DECK_SIZE; i += 1)
     {
-        Dice *dice = &deck[i];
-        if (dice->count() > 0)
+        uint8_t diceCount = static_cast<uint8_t>(deck[i].count());
+        if (diceCount > 0U)
         {
-            result += getDiceProbability(dice);
+            result += diceCount / cardsInDeck; // getDiceProbability(dice);
         }
     }
     return result;
@@ -40,16 +41,14 @@ DiceResult BalancedDice::rollDie(uint16_t seed)
         shuffle(seed);
     }
 
-    const float totalProbability = getTotalProbabilityWeight();
+    float targetRandomNumber = randfloat(seed) * getTotalProbabilityWeight();
 
-    float targetRandomNumber = randfloat(seed) * totalProbability;
-
-    Dice *dice;
     for (uint8_t i{rollCount}; i < DECK_SIZE_PAIRS; i += 1)
     {
-        assert(i < 15);
-        dice = &deck[draws[i]];
-        if (dice->count() > 0)
+        // 2022-09-21: What is this supposed to catch?
+        // assert(i < 13);
+        Dice *dice = &deck[draws[i] - 2];
+        if (static_cast<uint8_t>(dice->count()) > 0)
         {
             const float probability = getDiceProbability(dice);
             if (targetRandomNumber <= probability)
@@ -62,17 +61,28 @@ DiceResult BalancedDice::rollDie(uint16_t seed)
         }
     }
     assert(false);
-    return DiceResult{0, 0};
+    return DiceResult{0U, 0U};
+}
+
+void BalancedDice::shuffleDraws()
+{
+    for (uint8_t i = static_cast<uint8_t>(cardsInDeck - 1); i > (rollCount + 1); i -= 1)
+    {
+        uint8_t j = rand() % (i + 1);
+        uint8_t temp = draws[i];
+        draws[i] = draws[j];
+        draws[j] = temp;
+    }
 }
 
 void BalancedDice::shuffle(uint16_t seed)
 {
     rollCount = 0;
     cardsInDeck = DECK_SIZE_PAIRS;
-    shuffle_uint8_t(draws, DECK_SIZE_PAIRS, READFROM(seed, 0, 8));
+    shuffleDraws();
     for (uint8_t i{0}; i < 11; i++)
     {
-        deck[i].reset();
-        deck[i].shuffle(READFROM(seed, 8, 16));
+        const uint8_t shuffleSeed = static_cast<uint8_t>(READFROM(seed, 8, 8));
+        deck[i] = Dice{PAIRS_INITIAL_CONST[i], shuffleSeed};
     }
 }

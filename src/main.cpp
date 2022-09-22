@@ -7,12 +7,12 @@
 
 void setup()
 {
-  const uint16_t seed = 12345;
+  const uint16_t seed = 54321;
   int counts[11] = {0};
   BalancedDice ctr{seed};
   for (int n{0}; n < 16; n += 1)
   {
-    const uint16_t newSeed = 1974;
+    const uint16_t newSeed = static_cast<uint16_t>(1974 * n);
     auto result = ctr.rollDie(newSeed);
     assert(result.value > 0);
     counts[result.value - 2] += 1;

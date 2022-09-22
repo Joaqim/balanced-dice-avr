@@ -1,5 +1,11 @@
 #pragma once
+
+#ifdef __AVR__
 #include <Arduino.h>
+#else
+#include <stdint.h>
+#endif
+
 
 float randfloat(uint16_t seed);
 #if 0

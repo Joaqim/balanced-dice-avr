@@ -1,7 +1,14 @@
 #pragma once
 #include <stdlib.h>
 
+#ifdef __AVR__
+#include <Arduino.h>
 typedef unsigned int size_t;
+#else
+#include <stddef.h>
+#endif
+
+
 
 // TODO: Cast index to correct type to avoid narrowing warnings
 

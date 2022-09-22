@@ -1,9 +1,8 @@
 #include "random_utils.h"
 
-// TODO: Check that this is correct
+
 float randfloat(uint16_t seed)
 {
-    // return (float)(rand() / (RAND_MAX)) + 1.0;
     return (float)(seed) / ((float)UINT16_MAX / 1.0f);
 }
 

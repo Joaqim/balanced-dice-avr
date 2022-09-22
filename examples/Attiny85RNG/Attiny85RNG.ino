@@ -1,6 +1,7 @@
 #include <avr/sleep.h>
 #include <EEPROM.h>
 #include <TinyI2CMaster.h>
+#include <BalancedDice.h>
 
 #include "eeprom_content.h"
 
@@ -37,8 +38,16 @@ ISR(ADC_vect) {
 
 //Unimplemented User Input Trigger
 bool userInput(){
+    // Mock input when timer reaches 255 ticks. NOTE: untested.
+    uint8_t currentTick = TCNT0;
+    if(currentTick % 255) {
+        return true;
+    }
     return false;
 }
+
+static uint8_t nearRandomValue = 0;
+static BalancedDice ctr;
 
 void setup()
 {
@@ -48,10 +57,15 @@ void setup()
     // to 255 and overflow to 0 and continue counting until the power is cut.
     TCCR0A = 0x00;        // normal mode
     TCCR0B = (1 << CS00); // prescaling with 1
+
+    nearRandomValue = TCNT0;
+    ctr = BalancedDice{nearRandomValue};
+
 }
 
 static uint16_t seed = 0;
 static uint8_t n = 0;
+
 
 void loop()
 {
@@ -59,13 +73,15 @@ void loop()
 
     // If we access the timer at user input we get a pseudo random number from timer
     if(userInput()) {
-        uint8_t nearRandomValue = TCNT0;
+        nearRandomValue = TCNT0;
         if(n % 2) {
             seed = nearRandomValue;
         } else {
             seed = seed << 8 | nearRandomValue;
         }
 
-        n+= 1;
+        ctr.rollDie(seed);
+
+        n += 1;
     }
 }

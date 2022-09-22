@@ -1,6 +1,10 @@
 #pragma once
 #include <stdint.h>
 
+// NOTE: Implementation is dependant on these values being lower than certain byte sized thesholds i.e:
+// MIN_ROLLS_BEFORE_SHUFFLING, DECK_SIZE and MAX_ROLLS_COUNT is expected to be maximum of 4 bits (0..15)
+// See BalancedDice.h, rollCount,
+
 #define DECK_SIZE 11
 #define DECK_SIZE_PAIRS 36
 #define MAX_ROLLS_COUNT 8
@@ -17,28 +21,13 @@
 
 #define INITIAL_DECK                                               \
     {                                                              \
-        {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, { 12 } \
+        {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, { 12 } }
+
+#define INITIAL_DRAWS {                     \
+        2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, \
+        3, 4, 5, 6, 7, 8, 9, 10, 11,        \
+        4, 5, 6, 7, 8, 9, 10,               \
+        5, 6, 7, 8, 9,                      \
+        6, 7, 8,                            \
+        7                                   \
     }
-
-#define INITIAL_DRAWS { \
-        2, 3, 4, 5, 6, 7, 8, 9, 10, 11,  12 , \
-        3, 4, 5, 6, 7, 8, 9, 10, 11, \
-        4, 5, 6, 7, 8, 9, 10, \
-        5, 6, 7, 8, 9, \
-        6, 7, 8, \
-        7 \
-        }
-
-static const uint8_t DICE_PAIRS_CONST[DECK_SIZE][6][2] =
-    {
-        {{1, 1}},
-        {{1, 2}, {2, 1}},
-        {{1, 3}, {3, 1}, {2, 2}},
-        {{1, 4}, {4, 1}, {2, 3}, {3, 2}},
-        {{1, 5}, {5, 1}, {2, 4}, {4, 2}, {3, 3}},
-        {{1, 6}, {6, 1}, {2, 5}, {5, 2}, {3, 4}, {4, 3}},
-        {{2, 6}, {6, 2}, {3, 5}, {5, 3}, {4, 4}},
-        {{3, 6}, {6, 3}, {5, 4}, {4, 5}},
-        {{4, 6}, {6, 4}, {5, 5}},
-        {{5, 6}, {6, 5}},
-        {{6, 6}}};
