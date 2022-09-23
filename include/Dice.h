@@ -9,7 +9,7 @@
 
 struct Dice
 {
-    uint32_t bits : 27;
+    uint32_t bits : 28;
     Dice() : bits(0){};
     Dice(uint32_t bits_, uint8_t shuffleSeed = 0U) : bits(bits_)
     {
@@ -43,9 +43,10 @@ struct Dice
     FIELD(bits, p5d1, 15, 3);
     FIELD(bits, p6d1, 18, 3);
 #endif
-    // 2 bits (0..3) - Roll Count
-    FIELD(bits, roll_count, DICE_ROLL_COUNT_OFFSET, 2);
+    // 3 bits (0..7) - Roll Count
+    FIELD(bits, recentRollsCount, DICE_ROLL_COUNT_OFFSET, 3);
 
     // 4 bits (0..15) - Dice Value
     FIELD(bits, value, DICE_VALUE_OFFSET, 4);
+
 };

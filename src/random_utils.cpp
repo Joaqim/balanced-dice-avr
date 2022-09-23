@@ -1,5 +1,9 @@
 #include "random_utils.h"
+#include <stdlib.h>
 
+/* Number of bits in inttype_MAX, or in any (1<<k)-1 where 0 <= k < 2040 */
+#define IMAX_BITS(m) ((m) / ((m) % 255 + 1) / 255 % 255 * 8 + 7 - 86 / ((m) % 255 + 12))
+#define RAND_MAX_BITWIDTH (IMAX_BITS(RAND_MAX))
 
 float randfloat(uint16_t seed)
 {
@@ -19,4 +23,27 @@ uint32_t randint(uint32_t max, uint32_t min)
 uint8_t irand(uint8_t seed, uint8_t n)
 {
     return seed / ((UINT8_MAX / n) + 1);
+}
+
+
+uint16_t rand_uint16()
+{
+    uint16_t r = 0;
+    for (int i = 0; i < IMAX_BITS(UINT16_MAX); i += RAND_MAX_BITWIDTH)
+    {
+        r <<= RAND_MAX_BITWIDTH;
+        r |= rand();
+    }
+    return r;
+}
+
+uint8_t rand_uint8()
+{
+    uint8_t r = 0;
+    for (int i = 0; i < IMAX_BITS(UINT8_MAX); i += RAND_MAX_BITWIDTH)
+    {
+        r <<= RAND_MAX_BITWIDTH;
+        r |= rand();
+    }
+    return r;
 }

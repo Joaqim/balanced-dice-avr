@@ -2,13 +2,12 @@
 #include <stdint.h>
 
 // NOTE: Implementation is dependant on these values being lower than certain byte sized thesholds i.e:
-// MIN_ROLLS_BEFORE_SHUFFLING, DECK_SIZE and MAX_ROLLS_COUNT is expected to be maximum of 4 bits (0..15)
+// DECK_SIZE is expected to be maximum of 4 bits (0..15)
 // See BalancedDice.h, rollCount,
 
 #define DECK_SIZE 11
 #define DECK_SIZE_PAIRS 36
-#define MAX_ROLLS_COUNT 8
-#define MIN_ROLLS_BEFORE_RESHUFFLING 13
+#define MIN_ROLLS_BEFORE_RESHUFFLING 24 // 12 cards remaining in deck when we reshuffle
 #define PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED 0.3
 
 #define WITH_UNDO

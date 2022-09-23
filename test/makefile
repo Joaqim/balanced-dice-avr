@@ -6,6 +6,7 @@ LDFLAGS= -shared
 SOURCES = $(shell find ../src -wholename '../src/*.cpp' -not -wholename '../src/main.cpp')
 HEADERS = $(shell echo ../include/*.h)
 OBJECTS=$(SOURCES:.cpp=.o)
+#OBJECTS=$(patsubst ../src/%.cpp,%.o,$(SOURCES))
 
 BALANCED_DICE_INCDIR=../include
 
@@ -19,5 +20,12 @@ clean:
 $(TARGET) : $(OBJECTS)
 	$(CC) $(CPPFLAGS) $(OBJECTS) -o $@ $(LDFLAGS)
 
+#$(OBJECTS) : $(SOURCES)
+#	$(CC) $(CPPFLAGS) -c $< -o $@
+
+
 test: main.cpp
-	gcc -Wl,-rpath,../lib -L./ -lbalanced-dice -I../include main.cpp -o test
+	gcc -Wl,-rpath,./ -L./ -lbalanced-dice -I../include main.cpp -o test
+run-test: clean all
+	./test
+	#make clean &>/dev/null && make &>/dev/null && ./test

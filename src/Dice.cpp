@@ -39,8 +39,10 @@ uint8_t Dice::getPair(uint8_t count)
 DiceResult Dice::popDice()
 {
     const uint8_t c = count();
+    //const uint8_t rolls = roll_count();
     assert(c > 0);
     set_count(c - 1);
+    //set_roll_count(rolls + 1);
 
     return DiceResult{
         static_cast<uint8_t>(value()),
@@ -49,7 +51,7 @@ DiceResult Dice::popDice()
 
 const bool Dice::isEmpty()
 {
-    return count() == 0;
+    return count() == 0U;
 }
 
 void Dice::reset()

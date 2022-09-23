@@ -12,3 +12,7 @@ float randfloat(uint16_t seed);
 uint32_t randint(uint32_t max, uint32_t min = 0);
 #endif
 uint8_t irand(uint8_t seed, uint8_t n);
+
+
+uint16_t rand_uint16();
+uint8_t rand_uint8();
