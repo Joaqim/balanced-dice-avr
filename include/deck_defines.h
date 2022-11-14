@@ -6,17 +6,11 @@
 // See BalancedDice.h, rollCount,
 
 #define DECK_SIZE 11
+#define PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED 0.3f
 #define DECK_SIZE_PAIRS 36
-#define MIN_ROLLS_BEFORE_RESHUFFLING 24 // 12 cards remaining in deck when we reshuffle
-#define PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED 0.3
+#define MINIMUM_CARDS_LEFT_BEFORE_RESHUFFLING 12
 
-#define WITH_UNDO
-#ifdef WITH_UNDO
-#define MAXIMUM_UNDO 1
-#else
-#define MAXIMUM_UNDO 0
-#endif
-#define MAXIMUM_RECENT_ROLL_MEMORY 5 + MAXIMUM_UNDO
+#define MAXIMUM_RECENT_ROLL_MEMORY 5
 
 #define INITIAL_DECK                                               \
     {                                                              \

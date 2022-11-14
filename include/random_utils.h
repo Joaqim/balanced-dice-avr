@@ -14,5 +14,6 @@ uint32_t randint(uint32_t max, uint32_t min = 0);
 uint8_t irand(uint8_t seed, uint8_t n);
 
 
+uint32_t rand_uint32();
 uint16_t rand_uint16();
 uint8_t rand_uint8();

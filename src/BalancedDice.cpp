@@ -26,10 +26,11 @@ float BalancedDice::getDiceProbability(Dice *dice)
     assert(static_cast<uint8_t>(dice->count() > 0U));
     const uint8_t diceRecentRolls = dice->recentRollsCount();
     const uint8_t diceCount = dice->count();
-    float probability = (static_cast<float>(diceCount) / static_cast<float>(cardsInDeck));
-    if (static_cast<uint8_t>(diceRecentRolls > 0U))
+    // float probability = (static_cast<float>(diceCount) / static_cast<float>(cardsInDeck));
+    float probability = static_cast<float>(diceCount) / static_cast<float>(cardsInDeck);
+    if (diceRecentRolls > 0U)
     {
-        probability *= 1.f - (static_cast<float>(static_cast<uint8_t>(diceRecentRolls) * PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED));
+        probability *= 1.f - (static_cast<float>(diceRecentRolls) * PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED);
 
         if (probability < 0.f)
             return 0.f;
@@ -53,18 +54,36 @@ const float BalancedDice::getTotalProbabilityWeight()
     return result;
 }
 
-void BalancedDice::updateRecentlyRolled()
+void BalancedDice::shiftRecentlyRolled()
 {
     Dice *lastRecentRoll = &deck[recentRolls[0]];
-    lastRecentRoll->set_recentRollsCount(lastRecentRoll->recentRollsCount() - 1);
-    recentRollsCount -= 1;
-    for (uint8_t k{0}; k < MAXIMUM_RECENT_ROLL_MEMORY - 1; k += 1)
-        recentRolls[k] = recentRolls[k + 1];
+    lastRecentRoll->set_recentRollsCount(static_cast<uint8_t>(lastRecentRoll->recentRollsCount()) - 1U);
+    for (uint8_t k{0U}; k < MAXIMUM_RECENT_ROLL_MEMORY - 1U; k += 1U)
+        recentRolls[k] = recentRolls[k + 1U];
+    recentRollsCount -= 1U;
 }
 
-DiceResult BalancedDice::rollDie(uint16_t seed)
+DiceResult BalancedDice::popDie(Dice *dice, uint16_t diceIndex)
 {
-    if (rollCount > MIN_ROLLS_BEFORE_RESHUFFLING)
+    if (recentRollsCount >= MAXIMUM_RECENT_ROLL_MEMORY)
+    {
+        shiftRecentlyRolled();
+    }
+
+    dice->set_recentRollsCount(dice->recentRollsCount() + 1U);
+    recentRolls[recentRollsCount] = diceIndex;
+
+    cardsInDeck -= 1U;
+    rollCount += 1U;
+
+    recentRollsCount += 1U;
+
+    return dice->popDice();
+};
+
+DiceResult BalancedDice::rollDie(SEED seed)
+{
+    if (cardsInDeck <= MINIMUM_CARDS_LEFT_BEFORE_RESHUFFLING)
     {
         shuffle(seed);
     }
@@ -80,27 +99,40 @@ DiceResult BalancedDice::rollDie(uint16_t seed)
         {
             if (targetRandomNumber <= probability)
             {
-                dice->set_recentRollsCount(dice->recentRollsCount() + 1U);
-                recentRolls[recentRollsCount] = diceIndex;
-                recentRollsCount += 1;
-
-                cardsInDeck -= 1U;
-                rollCount += 1U;
-
-                if (recentRollsCount >= MAXIMUM_RECENT_ROLL_MEMORY)
-                    updateRecentlyRolled();
-
-                return dice->popDice();
+                return popDie(dice, diceIndex);
             }
         }
         targetRandomNumber -= probability;
     }
-    //assert(false);
-    return DiceResult{7U, (seed % 2) ? 4U : 3U};
+    // TODO: Debug why it sometimes reaches this point.
+    // assert(false);
+
+    for (uint8_t i{rollCount}; i < DECK_SIZE_PAIRS; i += 1U)
+    {
+        const uint16_t diceIndex = draws[i] - 2;
+
+        Dice *dice = &deck[diceIndex];
+        if (static_cast<uint8_t>(dice->count()) > 0U)
+        {
+            return popDie(&deck[diceIndex], diceIndex);
+        }
+    }
+    assert(false);
+    // return DiceResult{7U, (seed % 2) ? 4U : 3U};
 }
 
-void BalancedDice::shuffleDraws(uint16_t seed)
+#define USE_MACRO_SHUFFLE
+
+#ifdef USE_MACRO_SHUFFLE
+#include "shuffle_macro.h"
+decl_shuffle(uint8_t);
+#endif
+
+void BalancedDice::shuffleDraws(SEED seed)
 {
+#ifdef USE_MACRO_SHUFFLE
+    shuffle_uint8_t(draws, 36, seed);
+#else
     for (uint8_t i = static_cast<uint8_t>(cardsInDeck - 1U); i > (rollCount + 1U); i -= 1U)
     {
         uint8_t j = irand(seed, i + 1U); // rand() % (i + 1U);
@@ -108,19 +140,17 @@ void BalancedDice::shuffleDraws(uint16_t seed)
         draws[i] = draws[j];
         draws[j] = temp;
     }
+#endif
 }
 
-void BalancedDice::shuffle(uint16_t seed)
+void BalancedDice::shuffle(SEED seed)
 {
     rollCount = 0U;
     cardsInDeck = DECK_SIZE_PAIRS;
-    //shuffleDraws(READFROM(seed, 0, 8));
-    shuffleDraws(rand_uint16());
-    shuffleDraws(rand_uint16());
-    shuffleDraws(rand_uint16());
+    shuffleDraws(READFROM(seed, 0, 16));
     for (uint8_t i{0U}; i < 11U; i++)
     {
-        const uint8_t shuffleSeed = READFROM(seed, 8, 8);
+        const uint8_t shuffleSeed = READFROM(seed, 16, 8);
         deck[i] = Dice{PAIRS_INITIAL_CONST[i], shuffleSeed};
     }
 }

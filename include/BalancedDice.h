@@ -7,10 +7,12 @@
 
 #include <stdint.h>
 
+typedef uint32_t SEED;
+
 class BalancedDice
 {
 public:
-    BalancedDice(uint16_t seed): recentRollsCount{0} {
+    BalancedDice(SEED seed): recentRollsCount{0} {
         shuffle(seed);
     }
 
@@ -18,12 +20,12 @@ public:
     const inline float getTotalProbabilityWeight();
 
     float updateDiceProbabilities();
-    void updateRecentlyRolled();
+    void shiftRecentlyRolled();
 
-    DiceResult rollDie(uint16_t seed);
+    DiceResult rollDie(SEED seed);
 
-    void shuffleDraws(uint16_t seed);
-    void shuffle(uint16_t seed);
+    void shuffleDraws(SEED seed);
+    void shuffle(SEED seed);
 
     Dice deck[DECK_SIZE];
 
@@ -37,4 +39,6 @@ public:
 
     uint8_t recentRolls[MAXIMUM_RECENT_ROLL_MEMORY] = {0U};
     uint8_t recentRollsCount: 4;
+private:
+    DiceResult popDie(Dice *dice, uint16_t diceIndex);
 };

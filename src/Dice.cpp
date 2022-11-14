@@ -16,17 +16,16 @@ void Dice::swap(uint8_t a, uint8_t b, uint8_t size, uint8_t offset)
 
 void Dice::shuffle(uint8_t seed)
 {
-    srand(seed);
     uint8_t diceCount = count();
     if(diceCount == 1) return;
-#if 0
+#if 1
     bits = shuffleBits(seed, bits, diceCount, 3, DICE_PAIRS_OFFSET);
 #else
     for (uint8_t i = static_cast<uint8_t>(diceCount - 1); i > 0; i -= 1)
     {
-        uint8_t j = rand() % (i + 1);
+        uint8_t j = rand() % (i + 1); // TODO: Use seed
         assert(j < 8);
-        swap(i, j, 3, 3);
+        swap(i, j, 3, DICE_PAIRS_OFFSET);
     }
 #endif
 }
@@ -39,10 +38,8 @@ uint8_t Dice::getPair(uint8_t count)
 DiceResult Dice::popDice()
 {
     const uint8_t c = count();
-    //const uint8_t rolls = roll_count();
     assert(c > 0);
     set_count(c - 1);
-    //set_roll_count(rolls + 1);
 
     return DiceResult{
         static_cast<uint8_t>(value()),

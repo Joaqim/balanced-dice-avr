@@ -26,6 +26,6 @@ $(TARGET) : $(OBJECTS)
 
 test: main.cpp
 	gcc -Wl,-rpath,./ -L./ -lbalanced-dice -I../include main.cpp -o test
-run-test: clean all
+clean-test: clean all run-test
+run-test:
 	./test
-	#make clean &>/dev/null && make &>/dev/null && ./test

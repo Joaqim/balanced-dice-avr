@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-
 void printDiceResult(DiceResult &result)
 {
     printf("%u + %u = %u\n", result.dice1, result.dice2, result.value);
@@ -20,13 +19,54 @@ void printDiceResult(DiceResult &result)
     assert(result.dice1 + result.dice2 == result.value);
 }
 
+void printDraws(uint8_t draws[36])
+{
+    printf("----\ndraws: \n\t");
+    for (int n{0}; n < 36; n += 1)
+    {
+        printf("%u, ", draws[n]);
+    }
+    printf("\n----\n");
+}
+
+// Histogram - https://stackoverflow.com/a/9990787
+void printHistogram(int draws[])
+{
+    int max_value = draws[0];
+    for (int n{1}; n < 11; n += 1)
+    {
+        if (draws[n] > max_value)
+            max_value = draws[n];
+    }
+
+    const int chart_height = max_value;
+
+    for (int current_height = chart_height; current_height > 0; --current_height)
+    {
+        for (int n{0}; n < 11; n += 1)
+        {
+            const int value = draws[n];
+            const int bar_height = (value * chart_height) / max_value;
+            if (bar_height < current_height)
+                printf("     "); // we're still above the bar
+            else if (bar_height == current_height)
+                printf("  _  "); // reached the top of the bar
+            else                 // bar_height > current_height
+                printf(" | | "); // now the rest of the bar ...
+        }
+        printf("\n");
+    }
+    printf("  -    -    -    -    -    -    -    -    -    -    -\n");
+    printf("  2    3    4    5    6    7    8    9   10   11   12\n");
+}
+
 int main()
 {
 
     srand(time(NULL));
 #if 1
     float result{0.f};
-    for (int n{0}; n < 11; n += 1)
+    for (unsigned int n{0U}; n < 11U; n += 1U)
     {
 
         struct Dice dice = {PAIRS_INITIAL_CONST[n]};
@@ -39,13 +79,12 @@ int main()
         if (diceCount > 0U)
         {
             printf("%u\t", diceCount);
-            printf("%f\t", static_cast<float>(diceCount) / static_cast<float>(36U));
-            printf("%f\n", diceCount / 36U);
-            result += static_cast<float>(diceCount) / static_cast<float>(36U);
+            printf("%f\n", static_cast<float>(diceCount) / 36.f);
+            result += static_cast<float>(diceCount) / 36.f;
         }
 
         // dice.shuffle(static_cast<uint8_t>(time(NULL)));
-        const uint8_t seed = irand(static_cast<uint8_t>(rand()), UINT8_MAX - 1);
+        // const uint8_t seed = irand(static_cast<uint8_t>(rand()), UINT8_MAX - 1);
 
         // dice.shuffle(seed);
 
@@ -60,16 +99,16 @@ int main()
 #endif
 
         assert(dice.recentRollsCount() == 0);
-        assert(dice.value() == n + 2);
+        assert(dice.value() == n + 2U);
         assert(dice.recentRollsCount() == 0);
 
         auto result = dice.popDice();
-        // printDiceResult(result);
+        printDiceResult(result);
     }
-    printf("TotalProbability: %f\n", result * PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED);
+    printf("TotalProbability: %f\n", result);
 #endif
 
-    const uint16_t seed = static_cast<uint16_t>(rand() % UINT16_MAX);
+    const auto seed = rand_uint32();
 
     // printf("Seed: %u\n", seed);
     // printf("randfloat(): %f\n", randfloat(seed));
@@ -79,24 +118,21 @@ int main()
     assert(ctr.cardsInDeck > 0);
     assert(ctr.rollCount == 0);
     printf("%f\n", ctr.updateDiceProbabilities());
-#if 0
-    printf("----\ndraws: \n\t");
-    for (int n{0}; n < 36; n += 1)
-    {
-        printf("%u, ", ctr.draws[n]);
-    }
-    printf("\n----\n");
+#if 1
+    printDraws(ctr.draws);
+    ctr.shuffleDraws(rand_uint16());
+    printDraws(ctr.draws);
 #endif
 
     const auto sampleSize = 50;
     uint32_t numberOfDoubles = 0;
-    uint8_t doubles[11] = {0};
+    int doubles[11] = {0};
     uint8_t lastDiceValue = 0;
     for (int n{0}; n < sampleSize; n += 1)
     {
         // printf("Drawing index: %u\n", ctr.draws[n]);
-        //const uint16_t newSeed = static_cast<uint16_t>(rand());
-        const uint16_t newSeed = rand_uint16();
+        // const uint16_t newSeed = static_cast<uint16_t>(rand());
+        const auto newSeed = rand_uint32();
 
         const auto probabilityWeight = ctr.updateDiceProbabilities();
         const float rngModifier = randfloat(newSeed);
@@ -124,17 +160,17 @@ int main()
         counts[result.value - 2] += 1;
         // printf("%u ", result.value);
     }
+
+    printf("\n");
+#if 0
     for (int n{0}; n < 11; n += 1)
     {
         printf("%i, ", counts[n]);
     }
+    printf("\n");
+#endif
+#if 1
 
-    printf("\n\nDoubles:\n");
-    printf("Total: %u \n", numberOfDoubles);
-    for (int n{0}; n < 11; n += 1)
-    {
-        printf("%i, ", doubles[n]);
-    }
     printf("\n\nProbabilities:\n");
     for (int n{0}; n < 11; n += 1)
     {
@@ -144,6 +180,41 @@ int main()
             printf(", ");
         }
     }
+
+    printf("\n\nDoubles:\n");
+    printf("Total: %lu \n", numberOfDoubles);
+    for (int n{0}; n < 11; n += 1)
+    {
+        printf("%i, ", doubles[n]);
+    }
+    printf("\n Balanced Dice Histogram:\n");
+
+#endif
+
+    printHistogram(counts);
+
+    int normalDiceDoublesResults[11] = {0};
+    int normalDiceResults[11] = {0};
+    int lastResult = -1;
+    for (int n{0}; n < sampleSize; n += 1)
+    {
+        const int diceResult = rand() % 13;
+        normalDiceResults[diceResult] += 1;
+        if (diceResult == lastResult)
+        {
+            normalDiceDoublesResults[diceResult] += 1;
+        }
+        lastResult = diceResult;
+    }
+
+    printf("\n Unbalanced Dice Histogram:\n");
+    printHistogram(normalDiceResults);
+
+    printf("\n Balanced Dice Doubles Histogram:\n");
+    printHistogram(doubles);
+
+    printf("\n Unbalanced Dice Doubles Histogram:\n");
+    printHistogram(normalDiceDoublesResults);
 
     return 0;
 }
