@@ -1,6 +1,5 @@
 #include "../include/BalancedDice.h"
 
-#include "dice_tables.h"
 #include "random_utils.h"
 
 #include <assert.h>
@@ -23,7 +22,7 @@ float BalancedDice::updateDiceProbabilities()
 
 float BalancedDice::getDiceProbability(Dice *dice)
 {
-    assert(static_cast<uint8_t>(dice->count() > 0U));
+    assert(static_cast<uint8_t>(dice->count()) > 0U);
     const uint8_t diceRecentRolls = dice->recentRollsCount();
     const uint8_t diceCount = dice->count();
     // float probability = (static_cast<float>(diceCount) / static_cast<float>(cardsInDeck));
@@ -81,7 +80,7 @@ DiceResult BalancedDice::popDie(Dice *dice, uint16_t diceIndex)
     return dice->popDice();
 };
 
-DiceResult BalancedDice::rollDie(SEED seed)
+DiceResult BalancedDice::rollDie(uint32_t seed)
 {
     if (cardsInDeck <= MINIMUM_CARDS_LEFT_BEFORE_RESHUFFLING)
     {
@@ -90,9 +89,10 @@ DiceResult BalancedDice::rollDie(SEED seed)
 
     float targetRandomNumber = randfloat(seed) * updateDiceProbabilities();
 
+#ifdef USE_ORDERED_DRAWS
     for (uint8_t i{rollCount}; i < DECK_SIZE_PAIRS; i += 1U)
     {
-        const uint16_t diceIndex = draws[i] - 2;
+        const uint16_t diceIndex = draws[i] - 2U;
         Dice *dice = &deck[diceIndex];
         const float probability = diceProbabilities[diceIndex];
         if (static_cast<uint8_t>(dice->count()) > 0U)
@@ -104,12 +104,11 @@ DiceResult BalancedDice::rollDie(SEED seed)
         }
         targetRandomNumber -= probability;
     }
-    // TODO: Debug why it sometimes reaches this point.
-    // assert(false);
-
+    // TODO: Debug why it inevitably reaches this point.
+    //assert(false);
     for (uint8_t i{rollCount}; i < DECK_SIZE_PAIRS; i += 1U)
     {
-        const uint16_t diceIndex = draws[i] - 2;
+        const uint16_t diceIndex = draws[i] - 2U;
 
         Dice *dice = &deck[diceIndex];
         if (static_cast<uint8_t>(dice->count()) > 0U)
@@ -117,9 +116,32 @@ DiceResult BalancedDice::rollDie(SEED seed)
             return popDie(&deck[diceIndex], diceIndex);
         }
     }
+
     assert(false);
+#else
+    uint16_t diceIndex;
+    Dice *dice = nullptr;
+    while (true)
+    {
+        diceIndex = rand_uint8() % 11;
+        dice = &deck[diceIndex];
+        const float probability = diceProbabilities[diceIndex];
+        if (static_cast<uint8_t>(dice->count()) == 0U)
+        {
+            dice = nullptr;
+        }
+        else if (targetRandomNumber <= probability)
+        {
+            return popDie(dice, diceIndex);
+        }
+        targetRandomNumber -= probability;
+    }
+
+#endif
     // return DiceResult{7U, (seed % 2) ? 4U : 3U};
 }
+
+#ifdef USE_ORDERED_DRAWS
 
 #define USE_MACRO_SHUFFLE
 
@@ -128,26 +150,31 @@ DiceResult BalancedDice::rollDie(SEED seed)
 decl_shuffle(uint8_t);
 #endif
 
-void BalancedDice::shuffleDraws(SEED seed)
+void BalancedDice::shuffleDraws(uint32_t seed)
 {
 #ifdef USE_MACRO_SHUFFLE
     shuffle_uint8_t(draws, 36, seed);
 #else
     for (uint8_t i = static_cast<uint8_t>(cardsInDeck - 1U); i > (rollCount + 1U); i -= 1U)
     {
-        uint8_t j = irand(seed, i + 1U); // rand() % (i + 1U);
+        uint8_t j = rand_uint8_range(seed, i + 1U); // rand() % (i + 1U);
         uint8_t temp = draws[i];
         draws[i] = draws[j];
         draws[j] = temp;
     }
 #endif
 }
+#endif
 
-void BalancedDice::shuffle(SEED seed)
+void BalancedDice::shuffle(uint32_t seed)
 {
     rollCount = 0U;
     cardsInDeck = DECK_SIZE_PAIRS;
+
+#ifdef USE_ORDERED_DRAWS
     shuffleDraws(READFROM(seed, 0, 16));
+#endif
+
     for (uint8_t i{0U}; i < 11U; i++)
     {
         const uint8_t shuffleSeed = READFROM(seed, 16, 8);

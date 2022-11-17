@@ -30,7 +30,7 @@ void printDraws(uint8_t draws[36])
 }
 
 // Histogram - https://stackoverflow.com/a/9990787
-void printHistogram(int draws[])
+void printHistogram(int draws[], int chart_height = 20)
 {
     int max_value = draws[0];
     for (int n{1}; n < 11; n += 1)
@@ -38,8 +38,6 @@ void printHistogram(int draws[])
         if (draws[n] > max_value)
             max_value = draws[n];
     }
-
-    const int chart_height = max_value;
 
     for (int current_height = chart_height; current_height > 0; --current_height)
     {
@@ -60,11 +58,87 @@ void printHistogram(int draws[])
     printf("  2    3    4    5    6    7    8    9   10   11   12\n");
 }
 
+float getDiceTargetRandomValue(BalancedDice deck, uint32_t seed)
+{
+    const float rngModifier = randfloat(seed);
+
+    const auto probabilityWeight = deck.updateDiceProbabilities();
+    const float targetRandomValue = rngModifier * probabilityWeight;
+    return targetRandomValue;
+}
+#define SILENT
+
+void printCSV()
+{
+#ifndef SILENT
+    printf("gameNumber,diceResultValue,targetRandomValue,probabilityOfValueBeforeRoll,probabilityOfValueAfterRoll,previousRecentRolls\n");
+#endif
+
+    BalancedDice ctr{};
+
+    const int games = 100;
+    const int sampleSize = 50;
+
+#ifdef SILENT
+    int diceResults[11] = {0};
+#endif
+
+    for (int gameNumber{1}; gameNumber < games + 1; gameNumber += 1)
+    {
+        float probabilitesBeforeRoll[12] = {};
+        ctr.shuffle(rand_uint32());
+        for (int n{0}; n < sampleSize; n += 1)
+        {
+            const auto seed = rand_uint32();
+            // force shuffle to get accurate dice probability, shouldn't affect what rollDie() would have returned.
+            if (ctr.cardsInDeck <= MINIMUM_CARDS_LEFT_BEFORE_RESHUFFLING)
+                ctr.shuffle(seed);
+
+            const float targetRandomValue = getDiceTargetRandomValue(ctr, seed);
+
+            for (int i{0}; i < 11; i += 1)
+            {
+                probabilitesBeforeRoll[i] = ctr.diceProbabilities[i];
+            }
+
+            const int MAX_BUF = 16;
+            char *previousRecentRolls = (char *)malloc(MAX_BUF);
+            int length = 0;
+            for (int i{0}; i < ctr.recentRollsCount; i += 1)
+            {
+                // printf("%u", ctr.recentRolls[i] + 2);
+                length += snprintf(previousRecentRolls + length, MAX_BUF - length, "%u;", ctr.recentRolls[i] + 2);
+            }
+            snprintf(previousRecentRolls + length, MAX_BUF - length, "\0");
+
+            auto result = ctr.rollDie(seed);
+
+#ifdef SILENT
+            diceResults[result.value - 2] += 1;
+#endif
+
+            const float probablityOfValueBeforeRoll = probabilitesBeforeRoll[result.value - 2];
+            const float probablityOfValueAfterRoll = ctr.diceProbabilities[result.value - 2];
+
+#ifndef SILENT
+            printf("%i,%u,%f,%f,%f,%s", gameNumber, result.value, targetRandomValue, probablityOfValueBeforeRoll, probablityOfValueAfterRoll, previousRecentRolls);
+
+            printf("\n");
+#endif
+        }
+    }
+#ifdef SILENT
+    printHistogram(diceResults);
+#endif
+}
+
 int main()
 {
 
     srand(time(NULL));
-#if 1
+    printCSV();
+    return 0;
+#if 0
     float result{0.f};
     for (unsigned int n{0U}; n < 11U; n += 1U)
     {
@@ -118,7 +192,7 @@ int main()
     assert(ctr.cardsInDeck > 0);
     assert(ctr.rollCount == 0);
     printf("%f\n", ctr.updateDiceProbabilities());
-#if 1
+#if USE_ORDERED_DRAWS
     printDraws(ctr.draws);
     ctr.shuffleDraws(rand_uint16());
     printDraws(ctr.draws);
@@ -133,6 +207,10 @@ int main()
         // printf("Drawing index: %u\n", ctr.draws[n]);
         // const uint16_t newSeed = static_cast<uint16_t>(rand());
         const auto newSeed = rand_uint32();
+
+        // force shuffle here to get accurate dice probability, this exact configuration is done inside rollDie() normally.
+        if (ctr.cardsInDeck <= MINIMUM_CARDS_LEFT_BEFORE_RESHUFFLING)
+            ctr.shuffle(newSeed);
 
         const auto probabilityWeight = ctr.updateDiceProbabilities();
         const float rngModifier = randfloat(newSeed);
@@ -191,7 +269,7 @@ int main()
 
 #endif
 
-    printHistogram(counts);
+    printHistogram(counts, 10);
 
     int normalDiceDoublesResults[11] = {0};
     int normalDiceResults[11] = {0};
@@ -208,13 +286,13 @@ int main()
     }
 
     printf("\n Unbalanced Dice Histogram:\n");
-    printHistogram(normalDiceResults);
+    printHistogram(normalDiceResults, 10);
 
     printf("\n Balanced Dice Doubles Histogram:\n");
-    printHistogram(doubles);
+    printHistogram(doubles, 4);
 
     printf("\n Unbalanced Dice Doubles Histogram:\n");
-    printHistogram(normalDiceDoublesResults);
+    printHistogram(normalDiceDoublesResults, 4);
 
     return 0;
 }

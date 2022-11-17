@@ -5,6 +5,8 @@
 // DECK_SIZE is expected to be maximum of 4 bits (0..15)
 // See BalancedDice.h, rollCount,
 
+//#define USE_ORDERED_DRAWS
+
 #define DECK_SIZE 11
 #define PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED 0.3f
 #define DECK_SIZE_PAIRS 36

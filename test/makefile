@@ -25,7 +25,7 @@ $(TARGET) : $(OBJECTS)
 
 
 test: main.cpp
-	gcc -Wl,-rpath,./ -L./ -lbalanced-dice -I../include main.cpp -o test
+	gcc -g -Wl,-rpath,./ -L./ -lbalanced-dice -I../include main.cpp -o test
 clean-test: clean all run-test
 run-test:
 	./test
