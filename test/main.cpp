@@ -276,7 +276,7 @@ int main()
     int lastResult = -1;
     for (int n{0}; n < sampleSize; n += 1)
     {
-        const int diceResult = rand() % 13;
+        const int diceResult = (rand() % 6) + (rand() % 6);
         normalDiceResults[diceResult] += 1;
         if (diceResult == lastResult)
         {
