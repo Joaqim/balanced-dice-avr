@@ -34,7 +34,7 @@ Each is a sample of 50 dice being thrown.
   2    3    4    5    6    7    8    9   10   11   12
 ```
 <p>
-	<em>NOTE: 2 and 12 have the lowest value of 1 in their respective column.</em>
+	<em>NOTE: In this instance, 2 and 12 each have been thrown once, those columns having value of 1.</em>
 </p>
 
 ## Unbalanced Dice, naive implementation:
