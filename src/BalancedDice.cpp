@@ -119,20 +119,15 @@ DiceResult BalancedDice::rollDie(uint32_t seed)
 
     assert(false);
 #else
-    uint16_t diceIndex;
-    Dice *dice = nullptr;
     while (true)
     {
-        diceIndex = rand_uint8() % 11;
-        dice = &deck[diceIndex];
+        const uint16_t diceIndex = rand_uint8() % 11U;
         const float probability = diceProbabilities[diceIndex];
-        if (static_cast<uint8_t>(dice->count()) == 0U)
+        if (targetRandomNumber <= probability)
         {
-            dice = nullptr;
-        }
-        else if (targetRandomNumber <= probability)
-        {
-            return popDie(dice, diceIndex);
+            Dice *dice = &deck[diceIndex];
+            if(static_cast<uint8_t>(dice->count()) > 0U)
+                return popDie(dice, diceIndex);
         }
         targetRandomNumber -= probability;
     }
