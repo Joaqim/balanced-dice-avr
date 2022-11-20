@@ -6,9 +6,9 @@
 
 float BalancedDice::updateDiceProbabilities()
 {
-    assert(cardsInDeck > 0);
+    assert(cardsInDeck > 0U);
     float result{0.f};
-    for (int i{0}; i < DECK_SIZE; i += 1)
+    for (uint8_t i{0}; i < DECK_SIZE; i += 1U)
     {
         if (static_cast<uint8_t>(deck[i].count()) > 0U)
         {
