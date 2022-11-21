@@ -23,7 +23,7 @@ float BalancedDice::updateDiceProbabilities()
 float BalancedDice::getDiceProbability(Dice *dice)
 {
     assert(static_cast<uint8_t>(dice->count()) > 0U);
-    const uint8_t diceRecentRolls = dice->recentRollsCount();
+    const uint8_t diceRecentRolls = dice->rollCount();
     const uint8_t diceCount = dice->count();
     // float probability = (static_cast<float>(diceCount) / static_cast<float>(cardsInDeck));
     float probability = static_cast<float>(diceCount) / static_cast<float>(cardsInDeck);
@@ -56,7 +56,7 @@ const float BalancedDice::getTotalProbabilityWeight()
 void BalancedDice::shiftRecentlyRolled()
 {
     Dice *lastRecentRoll = &deck[recentRolls[0]];
-    lastRecentRoll->set_recentRollsCount(static_cast<uint8_t>(lastRecentRoll->recentRollsCount()) - 1U);
+    lastRecentRoll->set_rollCount(static_cast<uint8_t>(lastRecentRoll->rollCount()) - 1U);
     for (uint8_t k{0U}; k < MAXIMUM_RECENT_ROLL_MEMORY - 1U; k += 1U)
         recentRolls[k] = recentRolls[k + 1U];
     recentRollsCount -= 1U;
@@ -69,7 +69,7 @@ DiceResult BalancedDice::popDie(Dice *dice, uint16_t diceIndex)
         shiftRecentlyRolled();
     }
 
-    dice->set_recentRollsCount(dice->recentRollsCount() + 1U);
+    dice->set_rollCount(dice->rollCount() + 1U);
     recentRolls[recentRollsCount] = diceIndex;
 
     cardsInDeck -= 1U;

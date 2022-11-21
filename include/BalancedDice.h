@@ -10,11 +10,11 @@
 class BalancedDice
 {
 public:
-    BalancedDice(uint32_t seed) : recentRollsCount{0}
+    BalancedDice(uint32_t seed) : rollCount{0}
     {
         shuffle(seed);
     }
-    BalancedDice() : recentRollsCount{0} {}
+    BalancedDice() : rollCount{0} {}
 
     float getDiceProbability(Dice *dice);
     const inline float getTotalProbabilityWeight();

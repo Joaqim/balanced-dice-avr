@@ -44,7 +44,7 @@ struct Dice
     FIELD(bits, p6d1, 18, 3);
 #endif
     // 3 bits (0..7) - Roll Count
-    FIELD(bits, recentRollsCount, DICE_ROLL_COUNT_OFFSET, 3);
+    FIELD(bits, rollCount, DICE_ROLL_COUNT_OFFSET, 3);
 
     // 4 bits (0..15) - Dice Value
     FIELD(bits, value, DICE_VALUE_OFFSET, 4);
