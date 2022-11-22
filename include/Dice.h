@@ -25,7 +25,8 @@ struct Dice
     uint8_t getPair(uint8_t count);
     DiceResult popDice();
 
-    const bool isEmpty();
+    inline const bool isEmpty() { return count() == 0U; }
+    inline const bool hasPairs() { return count() > 0U; }
     void reset();
 
     void *pairs;
@@ -35,7 +36,7 @@ struct Dice
 
     // 3 bits (0..7) x 6 = 16 byte - Dice Pairs
     // FIELD(bits, pairs, 1, 16);
-#if 1
+#if 0
     FIELD(bits, p1d1, 3, 3);
     FIELD(bits, p2d1, 6, 3);
     FIELD(bits, p3d1, 9, 3);
@@ -44,9 +45,11 @@ struct Dice
     FIELD(bits, p6d1, 18, 3);
 #endif
     // 3 bits (0..7) - Roll Count
-    FIELD(bits, rollCount, DICE_ROLL_COUNT_OFFSET, 3);
+    inline uint8_t rollCount() const { return READFROM(bits, DICE_ROLL_COUNT_OFFSET, 3); }
+    inline void setRollCount(uint8_t value) { WRITETO(bits, DICE_ROLL_COUNT_OFFSET, 3, value); }
+    inline void decreaseRollCount() { setRollCount(static_cast<uint8_t>(rollCount()) - 1U); }
 
     // 4 bits (0..15) - Dice Value
-    FIELD(bits, value, DICE_VALUE_OFFSET, 4);
-
+    inline uint8_t diceValue() const { return READFROM(bits, DICE_VALUE_OFFSET, 4); }
+    inline void setDiceValue(uint8_t value) { WRITETO(bits, DICE_VALUE_OFFSET, 4, value); }
 };
