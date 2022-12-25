@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#define SILENT
+
 void printDiceResult(DiceResult &result)
 {
     printf("%u + %u = %u\n", result.dice1, result.dice2, result.value);
@@ -30,7 +32,7 @@ void printDraws(uint8_t draws[36])
 }
 
 // Histogram - https://stackoverflow.com/a/9990787
-void printHistogram(int draws[], int chart_height = 20)
+void printHistogram(uint32_t draws[], int chart_height = 20)
 {
     int max_value = draws[0];
     for (int n{1}; n < 11; n += 1)
@@ -66,7 +68,6 @@ float getDiceTargetRandomValue(BalancedDice deck, uint32_t seed)
     const float targetRandomValue = rngModifier * probabilityWeight;
     return targetRandomValue;
 }
-#define SILENT
 
 void printCSV()
 {
@@ -80,17 +81,19 @@ void printCSV()
     const int sampleSize = 50;
 
 #ifdef SILENT
-    int diceResults[11] = {0};
+    uint32_t diceResults[11] = {0};
 #endif
 
     for (int gameNumber{1}; gameNumber < games + 1; gameNumber += 1)
     {
-        float probabilitesBeforeRoll[12] = {};
+        float probabilitesBeforeRoll[11] = {};
         ctr.shuffle(rand_uint32());
+        ctr.updateDiceProbabilities();
         for (int n{0}; n < sampleSize; n += 1)
         {
             const auto seed = rand_uint32();
-            // force shuffle to get accurate dice probability, shouldn't affect what rollDie() would have returned.
+            // Force shuffle to get accurate dice probability for data collection,
+            // doesn't affect what rollDie() would have returned normally.
             if (ctr.cardsInDeck <= MINIMUM_CARDS_LEFT_BEFORE_RESHUFFLING)
                 ctr.shuffle(seed);
 
@@ -118,6 +121,7 @@ void printCSV()
 #endif
 
             const float probablityOfValueBeforeRoll = probabilitesBeforeRoll[result.value - 2];
+            ctr.updateDiceProbabilities();
             const float probablityOfValueAfterRoll = ctr.diceProbabilities[result.value - 2];
 
 #ifndef SILENT
@@ -137,7 +141,7 @@ int main()
 
     srand(time(NULL));
     printCSV();
-    return 0;
+     return 0;
 #if 0
     float result{0.f};
     for (unsigned int n{0U}; n < 11U; n += 1U)
@@ -187,21 +191,17 @@ int main()
     // printf("Seed: %u\n", seed);
     // printf("randfloat(): %f\n", randfloat(seed));
     //  const uint16_t seed = ;
-    int counts[11] = {0};
+    uint32_t counts[11] = {0};
     BalancedDice ctr{seed};
     assert(ctr.cardsInDeck > 0);
     assert(ctr.rollCount == 0);
     printf("%f\n", ctr.updateDiceProbabilities());
-#if USE_ORDERED_DRAWS
-    printDraws(ctr.draws);
-    ctr.shuffleDraws(rand_uint16());
-    printDraws(ctr.draws);
-#endif
 
-    const auto sampleSize = 50;
-    uint32_t numberOfDoubles = 0;
-    int doubles[11] = {0};
-    uint8_t lastDiceValue = 0;
+    const auto sampleSize = 50U;
+    uint32_t numberOfDoubles = 0U;
+    uint32_t highestNumberOfDoubles = 0U;
+    uint32_t doubles[11] = {0U};
+    uint8_t lastDiceValue = 0U;
     for (int n{0}; n < sampleSize; n += 1)
     {
         // printf("Drawing index: %u\n", ctr.draws[n]);
@@ -233,6 +233,10 @@ int main()
         {
             numberOfDoubles += 1;
             doubles[lastDiceValue - 2] += 1;
+            if (doubles[lastDiceValue - 2] > highestNumberOfDoubles)
+            {
+                highestNumberOfDoubles = doubles[lastDiceValue - 2];
+            }
         }
         lastDiceValue = result.value;
         counts[result.value - 2] += 1;
@@ -269,11 +273,11 @@ int main()
 
 #endif
 
-    printHistogram(counts, 10);
+    printHistogram(counts, 6);
 
-    int normalDiceDoublesResults[11] = {0};
-    int normalDiceResults[11] = {0};
-    int lastResult = -1;
+    uint32_t normalDiceDoublesResults[11] = {0};
+    uint32_t normalDiceResults[11] = {0};
+    uint8_t lastResult = 0;
     for (int n{0}; n < sampleSize; n += 1)
     {
         const int diceResult = (rand() % 6) + (rand() % 6);
@@ -286,13 +290,13 @@ int main()
     }
 
     printf("\n Unbalanced Dice Histogram:\n");
-    printHistogram(normalDiceResults, 10);
+    printHistogram(normalDiceResults, 6);
 
     printf("\n Balanced Dice Doubles Histogram:\n");
-    printHistogram(doubles, 4);
+    printHistogram(doubles, highestNumberOfDoubles);
 
     printf("\n Unbalanced Dice Doubles Histogram:\n");
-    printHistogram(normalDiceDoublesResults, 4);
+    printHistogram(normalDiceDoublesResults, highestNumberOfDoubles);
 
     return 0;
 }

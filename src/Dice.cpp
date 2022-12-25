@@ -42,17 +42,12 @@ DiceResult Dice::popDice()
     set_count(c - 1);
 
     return DiceResult{
-        static_cast<uint8_t>(value()),
+        static_cast<uint8_t>(diceValue()),
         getPair(c - 1)};
-}
-
-const bool Dice::isEmpty()
-{
-    return count() == 0U;
 }
 
 void Dice::reset()
 {
-    const uint8_t v = value();
+    const uint8_t v = diceValue();
     bits = PAIRS_INITIAL_CONST[v - 2];
 }
