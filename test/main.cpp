@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <assert.h>
+#include <stdlib.h> // malloc, srand
 
 #define SILENT
 
@@ -140,8 +142,8 @@ int main()
 {
 
     srand(time(NULL));
-    printCSV();
-     return 0;
+    //printCSV();
+     //return 0;
 #if 0
     float result{0.f};
     for (unsigned int n{0U}; n < 11U; n += 1U)

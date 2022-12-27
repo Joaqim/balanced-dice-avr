@@ -1,11 +1,8 @@
 #pragma once
-#include <stdint.h>
 
 // NOTE: Implementation is dependant on these values being lower than certain byte sized thesholds i.e:
 // DECK_SIZE is expected to be maximum of 4 bits (0..15)
-// See BalancedDice.h, rollCount,
-
-//#define USE_ORDERED_DRAWS
+// See BalancedDice.h: BalancedDice::rollCount,
 
 #define DECK_SIZE 11
 #define PROBABILITY_REDUCTION_FOR_RECENTLY_ROLLED 0.3f
@@ -14,15 +11,5 @@
 
 #define MAXIMUM_RECENT_ROLL_MEMORY 5
 
-#define INITIAL_DECK                                               \
-    {                                                              \
-        {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, { 12 } }
-
-#define INITIAL_DRAWS {                     \
-        2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, \
-        3, 4, 5, 6, 7, 8, 9, 10, 11,        \
-        4, 5, 6, 7, 8, 9, 10,               \
-        5, 6, 7, 8, 9,                      \
-        6, 7, 8,                            \
-        7                                   \
-    }
+#define INITIAL_DECK \
+         { {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}, {11}, { 12 } }

@@ -5,7 +5,7 @@
 #include "dice_constants.h"
 #include "deck_defines.h"
 
-#include <stdint.h>
+#include "common.h"
 
 class BalancedDice
 {
@@ -26,12 +26,7 @@ public:
 
     void shuffle(uint32_t seed);
 
-#ifdef USE_ORDERED_DRAWS
-    uint8_t draws[DECK_SIZE_PAIRS] = INITIAL_DRAWS;
-    void shuffleDraws(uint32_t seed);
-#endif
-
-    Dice deck[DECK_SIZE];
+    Dice deck[DECK_SIZE] = INITIAL_DECK;
 
     uint8_t cardsInDeck : 6; // 0..63
 

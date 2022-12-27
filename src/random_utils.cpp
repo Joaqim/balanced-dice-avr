@@ -1,5 +1,4 @@
 #include "random_utils.h"
-#include <stdlib.h>
 
 /* Number of bits in inttype_MAX, or in any (1<<k)-1 where 0 <= k < 2040 */
 #define IMAX_BITS(m) ((m) / ((m) % 255 + 1) / 255 % 255 * 8 + 7 - 86 / ((m) % 255 + 12))
