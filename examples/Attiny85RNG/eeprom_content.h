@@ -1,9 +1,6 @@
 #pragma once
 #include <avr/pgmspace.h>
 
-// TODO: Use avr include for typedef'd byte
-typedef unsigned char byte;
-
 #define RNG_MAGIC 0x1D544D50
 #define RNG_MAGIC0 0x1D
 #define RNG_MAGIC1 0x54
@@ -14,7 +11,7 @@ typedef unsigned char byte;
 #define RNG_CURRENT_ADDRESS 4
 #define RNG_READINGS_ADDRESS 5
 
-const byte header[] PROGMEM = {
+const uint8_t header[] PROGMEM = {
     RNG_MAGIC0, RNG_MAGIC1, RNG_MAGIC2, RNG_MAGIC3,
     RNG_READINGS_ADDRESS, // current reading
 };

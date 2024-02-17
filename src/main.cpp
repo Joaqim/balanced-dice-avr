@@ -4,12 +4,12 @@
 #include <stdint.h>
 #include <assert.h>
 
-
+static BalancedDice ctr{};
 void setup()
 {
   const uint16_t seed = 54321;
   int counts[11] = {0};
-  BalancedDice ctr{seed};
+  ctr.init(seed);
   for (int n{0}; n < 16; n += 1)
   {
     const uint16_t newSeed = static_cast<uint16_t>(1974 * n);
@@ -18,7 +18,7 @@ void setup()
     counts[result.value - 2] += 1;
   }
 
-  #if 0
+#if 0
   int t[12] = {};
   for (int n{0}; n < 11; n++)
   {
@@ -29,7 +29,7 @@ void setup()
     }
   }
 
-  #endif
+#endif
 }
 
 void loop()

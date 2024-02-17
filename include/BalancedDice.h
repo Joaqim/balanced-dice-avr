@@ -10,13 +10,15 @@
 class BalancedDice
 {
 public:
-    BalancedDice(uint32_t seed) : rollCount{0}
-    {
-        shuffle(seed);
+// cppcheck-suppress uninitMemberVar
+    explicit BalancedDice(uint32_t seed) {
+        init(seed);
     }
-    BalancedDice() : rollCount{0} {}
+
+    BalancedDice() {}
 
     float getDiceProbability(Dice *dice);
+    const inline void init(uint32_t seed) { shuffle(seed); };
     const inline float getTotalProbabilityWeight();
 
     float updateDiceProbabilities();
