@@ -5,6 +5,15 @@
 
 #include <assert.h>
 
+/**
+ * Shuffles the elements of the Dice object based on the provided seed.
+ *
+ * @param seed the seed value used for shuffling
+ *
+ * @return void
+ *
+ * @throws None
+ */
 void Dice::shuffle(uint8_t seed)
 {
     for (int i = pairCount - 1; i > 0; i--)
@@ -19,11 +28,28 @@ void Dice::shuffle(uint8_t seed)
     }
 }
 
+/**
+ * Retrieves the Dice pair at the specified index.
+ *
+ * @param count the index of the pair to retrieve
+ *
+ * @return the pair at the specified index
+ *
+ * @throws None
+ */
 uint8_t Dice::getPair(uint8_t count)
 {
     return pairs[count];
 }
 
+/**
+ * pops a dice pair from the Dice object and returns the result
+ *
+ * @return the result of the popped dice dice
+ *
+ * @throws assert error if pairCount is not greater than 0
+ * @throws assert error if diceValue is not greater than 0
+ */
 DiceResult Dice::popDice()
 {
     assert(pairCount > 0);

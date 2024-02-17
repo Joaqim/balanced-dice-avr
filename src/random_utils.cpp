@@ -4,6 +4,15 @@
 #define IMAX_BITS(m) ((m) / ((m) % 255 + 1) / 255 % 255 * 8 + 7 - 86 / ((m) % 255 + 12))
 #define RAND_MAX_BITWIDTH (IMAX_BITS(RAND_MAX))
 
+/**
+ * Generate a random float value using the given seed.
+ *
+ * @param seed The seed used to generate the random float value.
+ *
+ * @return The random float value generated based on the seed.
+ *
+ * @throws None
+ */
 float randfloat(uint16_t seed)
 {
     return (float)seed / (static_cast<float>(UINT16_MAX) / 1.0f);
@@ -24,6 +33,13 @@ uint8_t rand_uint8_range(uint8_t seed, uint8_t max){
     return seed / ((UINT8_MAX / max) + 1);
 }
 
+/**
+ * Generates a random 16-bit unsigned integer.
+ *
+ * @return random 16-bit unsigned integer
+ *
+ * @throws None
+ */
 uint16_t rand_uint16()
 {
     uint16_t r = 0;
@@ -35,6 +51,11 @@ uint16_t rand_uint16()
     return r;
 }
 
+/**
+ * Generates a random 32-bit unsigned integer using the rand() function.
+ *
+ * @return the generated random 32-bit unsigned integer
+ */
 uint32_t rand_uint32()
 {
     uint32_t r = 0;
@@ -46,6 +67,13 @@ uint32_t rand_uint32()
     return r;
 }
 
+/**
+ * Generates a random unsigned 8-bit integer.
+ *
+ * @return random unsigned 8-bit integer
+ *
+ * @throws None
+ */
 uint8_t rand_uint8()
 {
     uint8_t r = 0;

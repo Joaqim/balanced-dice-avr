@@ -5,6 +5,11 @@
 
 #include <assert.h>
 
+/**
+ * Updates the probabilities of each dice in the deck.
+ *
+ * @return The total probability of all dice in the deck.
+ */
 float BalancedDice::updateDiceProbabilities()
 {
     assert(cardsInDeck > 0U);
@@ -18,6 +23,15 @@ float BalancedDice::updateDiceProbabilities()
     return result;
 }
 
+/**
+ * Calculate the probability of getting a pair with the given Dice object.
+ *
+ * @param dice pointer to the Dice object
+ *
+ * @return the probability of getting the value of dice in current deck
+ *
+ * @throws None
+ */
 float BalancedDice::getDiceProbability(Dice *dice)
 {
     if (!dice->hasPairs())
@@ -39,6 +53,13 @@ float BalancedDice::getDiceProbability(Dice *dice)
     return probability;
 }
 
+/**
+ * Calculate the total probability weight of the dice in the deck.
+ *
+ * @return the total probability weight
+ *
+ * @throws Assertion error if cardsInDeck is not greater than 0
+ */
 const float BalancedDice::getTotalProbabilityWeight()
 {
     assert(cardsInDeck > 0);
@@ -52,6 +73,9 @@ const float BalancedDice::getTotalProbabilityWeight()
     return result;
 }
 
+/**
+ * Shifts the recently rolled dice in the BalancedDice deck.
+ */
 void BalancedDice::shiftRecentlyRolled()
 {
     Dice *lastRecentRoll = &deck[recentRolls[0]];
@@ -61,6 +85,16 @@ void BalancedDice::shiftRecentlyRolled()
     recentRollsCount -= 1U;
 }
 
+/**
+ * Pop a die from the Dice object and update the recent rolls and roll counts.
+ *
+ * @param dice The Dice object from which to pop the die.
+ * @param diceIndex The index of the die to pop.
+ *
+ * @return The result of two thrown dice from  of the popped dice pair.
+ *
+ * @throws None
+ */
 DiceResult BalancedDice::popDie(Dice *dice, uint16_t diceIndex)
 {
     if (recentRollsCount >= MAXIMUM_RECENT_ROLL_MEMORY)
@@ -79,6 +113,15 @@ DiceResult BalancedDice::popDie(Dice *dice, uint16_t diceIndex)
     return dice->popDice();
 }
 
+/**
+ * Rolls a balanced dice based on the given seed.
+ *
+ * @param seed the seed for random number generation
+ *
+ * @return the result of the dice roll
+ *
+ * @throws None
+ */
 DiceResult BalancedDice::rollDie(uint32_t seed)
 {
     if (cardsInDeck <= MINIMUM_CARDS_LEFT_BEFORE_RESHUFFLING)
@@ -103,6 +146,15 @@ DiceResult BalancedDice::rollDie(uint32_t seed)
     return DiceResult{7U, static_cast<uint8_t>((seed % 2) ? 4U : 3U)};
 }
 
+/**
+ * Shuffles the deck using the given seed.
+ *
+ * @param seed the seed used for shuffling
+ *
+ * @return void
+ *
+ * @throws None
+ */
 void BalancedDice::shuffle(uint32_t seed)
 {
     rollCount = 0U;
